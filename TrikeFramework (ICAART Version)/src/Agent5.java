@@ -1,5 +1,5 @@
 //####################################################################################
-//Trike Agent v1.7: translation + code cleaned 
+//Trike Agent v1.7.1: code cleaned
 //####################################################################################
 /**
 * This Class contains a vehicle agent
@@ -10,7 +10,6 @@
 import jade.core.Agent;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
@@ -48,7 +47,6 @@ public class Agent5 extends Agent
 	//Integer debug = 1; //debuging Mode on = 1, off = 0, gives additional information
 	Integer showmem = 1; // shows the state of belief, desire, intention and other
 	Integer showstatus = 1; // prints the status of an agent
-	Timestamp timestampRunning = new Timestamp(0);
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 	Debug debug = new Debug();
 	Logger logger = new Logger(belief.getTheta());
@@ -307,7 +305,6 @@ public class Agent5 extends Agent
 				}
 				if(actplan.getMultipart()==0) { // when the job was not only a part of many it is finished now
 					belief.updateJobStatus(actplan.getJobID(), "finished");
-					timestampRunning.setTime(0);
 				}
 				EventQueue.add("start_act"); // The act behaviour is finished and the next 
 				}
@@ -353,16 +350,6 @@ public class Agent5 extends Agent
 							if (showstatus==1) System.out.println(status + "add start_evaluate to EventQueue"); // status info
 							//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 							EventQueue.add("start_evaluate");
-							Timestamp newTimestamp = new Timestamp(System.currentTimeMillis());
-							if (!(timestampRunning.equals(new Timestamp(0)))) {                                                 
-
-								long elapsedTime =  newTimestamp.getTime() - timestampRunning.getTime();
-								Double energyConsumption = elapsedTime * belief.energyConsumptionPerMillisecond;
-								Double newBattery = belief.getBattery() * belief.maxBatteryCharge - energyConsumption;
-								newBattery = newBattery/belief.maxBatteryCharge;
-								belief.setBattery(newBattery);							
-							}
-							timestampRunning = newTimestamp;
 						}
 						//====================================================================================
 						// receive the AgentIDs if the Agents in arm lengh reach
@@ -429,16 +416,6 @@ public class Agent5 extends Agent
 						else if (message.getMessageType().equals("accept")) {
 							belief.setJobProgressOfJobID(message.getJobID(), "accepted");
 							EventQueue.add("start_filter");
-							Timestamp newTimestamp = new Timestamp(System.currentTimeMillis());
-							if (!(timestampRunning.equals(new Timestamp(0)))) {			
-								
-								long elapsedTime =  newTimestamp.getTime() - timestampRunning.getTime();
-								Double energyConsumption = elapsedTime * belief.energyConsumptionPerMillisecond;
-								Double newBattery = belief.getBattery() * belief.maxBatteryCharge - energyConsumption;
-								newBattery = newBattery/belief.maxBatteryCharge;
-								belief.setBattery(newBattery);							
-							}
-							timestampRunning = newTimestamp;
 						}
 						
 						else {
